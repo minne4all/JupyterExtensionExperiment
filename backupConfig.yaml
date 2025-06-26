@@ -1,0 +1,56 @@
+proxy:
+  secretToken: "421a25351d5eca5aa374425ed5063e4b088fd117e6792c21f4ca7fba0aa79f48"
+  https:
+    enabled: true
+    type: secret
+    secret:
+      name: jupyterhub-tls
+    hosts:
+      - jupyter.jupyterextension.com
+  service:
+    type: LoadBalancer
+    loadBalancerIP: 35.195.4.166
+    disableHttpPort: true
+
+ingress:
+  enabled: false
+
+hub:
+  config:
+    JupyterHub:
+      authenticator_class: nativeauthenticator.NativeAuthenticator
+      cookie_options:
+        SameSite: "None"
+        secure: true
+      tornado_settings:
+        cookie_options:
+          SameSite: "None"
+          secure: True
+        headers:
+          X-Forwarded-Proto: "https"
+    NativeAuthenticator:
+      open_signup: true
+      minimum_password_length: 4
+
+  extraConfig:
+    setAdmin: |
+      c.Authenticator.admin_users = {"minnevanderpoel"}
+
+  extraEnv:
+    PIP_INSTALL: "pip install nativeauthenticator"
+
+  image:
+    name: jupyterhub/k8s-hub
+    tag: 3.3.8
+
+singleuser:
+  image:
+    name: gcr.io/jupyterhub-experiment-12/jupyterhub-user-image
+    tag: latest
+    pullPolicy: Always
+  memory:
+    guarantee: 1G
+    limit: 2G
+  cpu:
+    guarantee: 0.5
+    limit: 1
